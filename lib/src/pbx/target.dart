@@ -16,6 +16,38 @@ mixin PBXTargetMixin on PBXElement {
 
   /// The product name
   String get productName => get('productName');
+
+  void addRunScript(
+      {required String name,
+      required String shellScript,
+      List<String> files = const [],
+      List<String> inputFileListPaths = const [],
+      List<String> inputsPaths = const [],
+      List<String> outputPaths = const [],
+      List<String> outputFileListPaths = const []}) {
+    const buildActionMask = 2147483647; // buildActionMask is const (compatible) for this below parameter
+    const runOnlyForDeploymentPostprocessing = 0; // install build only = false (unchecked)
+    const alwaysOutOfDate = 1;
+
+    var uuid = UuidGenerator().random();
+
+    project.set('objects/$uuid', {
+      'isa': 'PBXShellScriptBuildPhase',
+      'alwaysOutOfDate': alwaysOutOfDate,
+      'buildActionMask': buildActionMask,
+      'files': files,
+      'inputFileListPaths': inputFileListPaths,
+      'inputPaths': inputsPaths,
+      'outputFileListPaths': outputFileListPaths,
+      'outputPaths': outputPaths,
+      'shellPath': '/bin/sh;',
+      'shellScript': shellScript,
+      'runOnlyForDeploymentPostprocessing': runOnlyForDeploymentPostprocessing,
+    });
+
+    var p = 'objects/${this.uuid}/buildPhases';
+    project.set(p, [...getList('buildPhases'), uuid]);
+  }
 }
 
 abstract class PBXTarget = PBXElement with PBXTargetMixin;
