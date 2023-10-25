@@ -26,6 +26,7 @@ mixin PBXTargetMixin on PBXElement {
     List<String> inputsPaths = const [],
     List<String> outputPaths = const [],
     List<String> outputFileListPaths = const [],
+    String shellPath = '/bin/sh',
     int? showEnvVarsInLog, // 'Show environment variables in build log' default checked (null - not visible)
     String? dependencyFile, // Default 'discovered dependency file' option unchecked (null - not visible)
     int? alwaysOutOfDate, // 'Based on dependency analysis' default checked (null - not visible)
@@ -45,7 +46,7 @@ mixin PBXTargetMixin on PBXElement {
       'inputPaths': inputsPaths,
       'outputFileListPaths': outputFileListPaths,
       'outputPaths': outputPaths,
-      'shellPath': '/bin/sh;',
+      'shellPath': shellPath,
       'shellScript': shellScript,
       'runOnlyForDeploymentPostprocessing': runOnlyForDeploymentPostprocessing,
       'showEnvVarsInLog': showEnvVarsInLog,
