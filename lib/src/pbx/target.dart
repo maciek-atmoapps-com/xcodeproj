@@ -56,6 +56,24 @@ mixin PBXTargetMixin on PBXElement {
     var p = 'objects/${this.uuid}/buildPhases';
     project.set(p, [...getList('buildPhases'), uuid]);
   }
+
+  /// Remove Run script from Xcode "Build Phase", also the reference.
+  void removeRunScript(String name) {
+    final buildPhasesListString = [...getList('buildPhases')];
+
+    // list uuid which is the same as 'name' parameter
+    final uuidToDeleted = buildPhases.whereType<PBXShellScriptBuildPhase>().where((element) => element.name == name).map((e) => e.uuid);
+
+    // Remove run script object (with all parameters)
+    for (final uuid in uuidToDeleted) {
+      buildPhasesListString.removeWhere((element) => (element as String) == uuid);
+      project.set('objects/$uuid', null);
+    }
+
+    // Remove UUIDs from buildPhases list (reference)
+    var p = 'objects/$uuid/buildPhases';
+    project.set(p, buildPhasesListString);
+  }
 }
 
 abstract class PBXTarget = PBXElement with PBXTargetMixin;
