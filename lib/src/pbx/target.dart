@@ -27,9 +27,9 @@ mixin PBXTargetMixin on PBXElement {
     List<String> outputPaths = const [],
     List<String> outputFileListPaths = const [],
     String shellPath = '/bin/sh',
-    int? showEnvVarsInLog, // 'Show environment variables in build log' default checked (null - not visible)
+    bool showEnvVarsInLog = true, // 'Show environment variables in build log' default checked (null - not visible)
     String? dependencyFile, // Default 'discovered dependency file' option unchecked (null - not visible)
-    int? alwaysOutOfDate, // 'Based on dependency analysis' default checked (null - not visible)
+    bool alwaysOutOfDate = true, // 'Based on dependency analysis' default checked (null - not visible)
   }) {
     const buildActionMask = 2147483647; // buildActionMask is const (compatible) for this below parameter
     const runOnlyForDeploymentPostprocessing = 0; // install build only = false (unchecked)
@@ -39,7 +39,7 @@ mixin PBXTargetMixin on PBXElement {
     project.set('objects/$uuid', {
       'isa': 'PBXShellScriptBuildPhase',
       'name': name,
-      'alwaysOutOfDate': alwaysOutOfDate,
+      'alwaysOutOfDate': alwaysOutOfDate ? null : 1, // this is not an error, xCode set flag 1 if this value unchecked
       'buildActionMask': buildActionMask,
       'files': files,
       'inputFileListPaths': inputFileListPaths,
@@ -49,7 +49,7 @@ mixin PBXTargetMixin on PBXElement {
       'shellPath': shellPath,
       'shellScript': shellScript,
       'runOnlyForDeploymentPostprocessing': runOnlyForDeploymentPostprocessing,
-      'showEnvVarsInLog': showEnvVarsInLog,
+      'showEnvVarsInLog': showEnvVarsInLog ? null : 0, // this is not an error, xCode set flag 0 if this value unchecked
       'dependencyFile': dependencyFile,
     });
 
