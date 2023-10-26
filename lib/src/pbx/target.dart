@@ -57,12 +57,19 @@ mixin PBXTargetMixin on PBXElement {
     project.set(p, [...getList('buildPhases'), uuid]);
   }
 
-  /// Remove Run script from Xcode "Build Phase", also the reference.
-  void removeRunScript(String name) {
+  /// Remove Run script with proper [name] from Xcode "Build Phase", and also the reference.
+  /// Return true if script existed and now it doesn't, otherwise false.
+  bool removeRunScript(String name) {
+    var isRemoved = false;
+
     final buildPhasesListString = [...getList('buildPhases')];
 
     // list uuid which is the same as 'name' parameter
     final uuidToDeleted = buildPhases.whereType<PBXShellScriptBuildPhase>().where((element) => element.name == name).map((e) => e.uuid);
+
+    if (uuidToDeleted.isNotEmpty) {
+      isRemoved = true;
+    }
 
     // Remove run script object (with all parameters)
     for (final uuid in uuidToDeleted) {
@@ -73,6 +80,8 @@ mixin PBXTargetMixin on PBXElement {
     // Remove UUIDs from buildPhases list (reference)
     var p = 'objects/$uuid/buildPhases';
     project.set(p, buildPhasesListString);
+
+    return isRemoved;
   }
 }
 
