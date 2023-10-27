@@ -16,6 +16,73 @@ mixin PBXTargetMixin on PBXElement {
 
   /// The product name
   String get productName => get('productName');
+
+  /// Add Run script into Xcode "Build Phase".
+  void addRunScript({
+    required String name,
+    required String shellScript,
+    List<String> files = const [],
+    List<String> inputFileListPaths = const [],
+    List<String> inputsPaths = const [],
+    List<String> outputPaths = const [],
+    List<String> outputFileListPaths = const [],
+    String shellPath = '/bin/sh',
+    bool showEnvVarsInLog = true, // 'Show environment variables in build log' default checked (null - not visible)
+    String? dependencyFile, // Default 'discovered dependency file' option unchecked (null - not visible)
+    bool alwaysOutOfDate = true, // 'Based on dependency analysis' default checked (null - not visible)
+  }) {
+    const buildActionMask = 2147483647; // buildActionMask is const (compatible) for this below parameter
+    const runOnlyForDeploymentPostprocessing = 0; // install build only = false (unchecked)
+
+    var uuid = UuidGenerator().random();
+
+    project.set('objects/$uuid', {
+      'isa': 'PBXShellScriptBuildPhase',
+      'name': name,
+      'alwaysOutOfDate': alwaysOutOfDate ? null : 1, // this is not an error, xCode set flag 1 if this value unchecked
+      'buildActionMask': buildActionMask,
+      'files': files,
+      'inputFileListPaths': inputFileListPaths,
+      'inputPaths': inputsPaths,
+      'outputFileListPaths': outputFileListPaths,
+      'outputPaths': outputPaths,
+      'shellPath': shellPath,
+      'shellScript': shellScript,
+      'runOnlyForDeploymentPostprocessing': runOnlyForDeploymentPostprocessing,
+      'showEnvVarsInLog': showEnvVarsInLog ? null : 0, // this is not an error, xCode set flag 0 if this value unchecked
+      'dependencyFile': dependencyFile,
+    });
+
+    var p = 'objects/${this.uuid}/buildPhases';
+    project.set(p, [...getList('buildPhases'), uuid]);
+  }
+
+  /// Remove Run script with proper [name] from Xcode "Build Phase", and also the reference.
+  /// Return true if script existed and now it doesn't, otherwise false.
+  bool removeRunScript(String name) {
+    var isRemoved = false;
+
+    final buildPhasesListString = [...getList('buildPhases')];
+
+    // list uuid which is the same as 'name' parameter
+    final uuidToDeleted = buildPhases.whereType<PBXShellScriptBuildPhase>().where((element) => element.name == name).map((e) => e.uuid);
+
+    if (uuidToDeleted.isNotEmpty) {
+      isRemoved = true;
+    }
+
+    // Remove run script object (with all parameters)
+    for (final uuid in uuidToDeleted) {
+      buildPhasesListString.removeWhere((element) => (element as String) == uuid);
+      project.set('objects/$uuid', null);
+    }
+
+    // Remove UUIDs from buildPhases list (reference)
+    var p = 'objects/$uuid/buildPhases';
+    project.set(p, buildPhasesListString);
+
+    return isRemoved;
+  }
 }
 
 abstract class PBXTarget = PBXElement with PBXTargetMixin;

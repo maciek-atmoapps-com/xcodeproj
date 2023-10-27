@@ -51,6 +51,8 @@ mixin PBXShellScriptBuildPhaseMixin on PBXBuildPhaseMixin {
 
   /// The content of the script shell
   String get shellScript => get('shellScript');
+
+  String get name => get('name');
 }
 
 /// Element for the resources copy build phase.
