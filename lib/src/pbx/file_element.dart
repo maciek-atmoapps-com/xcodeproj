@@ -65,6 +65,33 @@ mixin PBXGroupMixin on PBXFileElement {
   /// A list of references to [PBXFileElement] elements
   List<PBXFileElement> get children => getObjectList('children');
 
+  bool removeReference(String path) {
+    var isRemoved = false;
+
+    var children = [...this.children];
+
+    // list uuids which is the same as 'path' parameter
+    final uuidToDeleted = children.where((e) => e.path == path).map((e) => e.uuid).toList();
+
+    if (uuidToDeleted.isNotEmpty) {
+      isRemoved = true;
+    }
+
+    // Remove object
+    children.removeWhere((childrenElement) => uuidToDeleted.any((element) => element == childrenElement.uuid));
+
+    for (var element in uuidToDeleted) {
+      project.set('objects/$element', null);
+    }
+
+    // Remove reference (UUID)
+    final modifiedChildrenUUIDList = children.map((e) => e.uuid).toList();
+    var p = '$_path/children';
+    project.set(p, [...modifiedChildrenUUIDList]);
+
+    return isRemoved;
+  }
+
   PBXFileReference? addReference(String path, {String sourceTree = '<group>'}) {
     var uuid = UuidGenerator().random();
 
