@@ -65,7 +65,7 @@ mixin PBXGroupMixin on PBXFileElement {
   /// A list of references to [PBXFileElement] elements
   List<PBXFileElement> get children => getObjectList('children');
 
-  bool removeReference(String path) {
+  bool removeReferences(String path) {
     var isRemoved = false;
 
     var children = [...this.children];
